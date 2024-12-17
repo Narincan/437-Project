@@ -1,5 +1,5 @@
 <?php
-// Enable error reporting
+// Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -9,14 +9,13 @@ $user = "root";         // Replace with your MySQL username
 $password = "";         // Replace with your MySQL password
 $database = "news_website";
 
-// Step 1: Connect to MySQL without a database
+// Step 1: Connect to MySQL without database
 $conn = mysqli_connect($host, $user, $password);
-
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Step 2: Create the database if it does not exist
+// Step 2: Create the database if not exists
 $db_query = "CREATE DATABASE IF NOT EXISTS $database";
 if (!mysqli_query($conn, $db_query)) {
     die("Error creating database: " . mysqli_error($conn));
@@ -25,8 +24,8 @@ if (!mysqli_query($conn, $db_query)) {
 // Select the database
 mysqli_select_db($conn, $database);
 
-// Step 3: Create `news_articles` table with image_url column
-$table_query = "
+// Step 3: Create `news_articles` table (to store news articles)
+$news_articles_table = "
 CREATE TABLE IF NOT EXISTS news_articles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rss_id VARCHAR(255) UNIQUE NOT NULL,
@@ -36,10 +35,26 @@ CREATE TABLE IF NOT EXISTS news_articles (
     date_published DATETIME NOT NULL,
     is_deleted TINYINT(1) DEFAULT 0
 )";
-
-if (!mysqli_query($conn, $table_query)) {
-    die("Error creating table: " . mysqli_error($conn));
+if (!mysqli_query($conn, $news_articles_table)) {
+    die("Error creating `news_articles` table: " . mysqli_error($conn));
 }
 
-// Connection success
+// Step 4: Create `users` table (to store registered users)
+$users_table = "
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fullname VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL, -- Hashed password
+    role ENUM('admin', 'user') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+if (!mysqli_query($conn, $users_table)) {
+    die("Error creating `users` table: " . mysqli_error($conn));
+}
+
+// Step 5: Confirmation
+// Uncomment this line for debugging to confirm the tables are created.
+// echo "Database and tables initialized successfully.";
 ?>

@@ -1,53 +1,15 @@
 <?php
-// Enable error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+session_start(); // Start session to check login status
+include 'db.php'; // Include database connection
 
-include 'db.php'; // Database connection
-
-// Step 1: Fetch RSS Feed
-$rssUrl = "https://rss.app/feeds/v1.1/_XwwiGIQsUmb6Z8hc.json";
-$response = file_get_contents($rssUrl);
-
-if (!$response) {
-    die("Failed to fetch the RSS feed. Please try again later.");
-}
-
-$articles = json_decode($response, true)['items'] ?? [];
-
-// Step 2: Insert New Articles into the Database
-foreach ($articles as $article) {
-    $rss_id = isset($article['id']) ? $article['id'] : uniqid("rss_");
-    $title = isset($article['title']) && !empty($article['title']) 
-             ? mysqli_real_escape_string($conn, $article['title']) 
-             : "No Title Available";
-
-    $content_text = isset($article['content_text']) && !empty($article['content_text']) 
-                    ? mysqli_real_escape_string($conn, $article['content_text']) 
-                    : "No content available.";
-
-    $image_url = isset($article['image']) && !empty($article['image']) 
-                 ? mysqli_real_escape_string($conn, $article['image']) 
-                 : null;
-
-    $date_published = isset($article['date_published']) && !empty($article['date_published']) 
-                      ? date('Y-m-d H:i:s', strtotime($article['date_published'])) 
-                      : date('Y-m-d H:i:s');
-
-    // Check for duplicates
-    $check_query = "SELECT id FROM news_articles WHERE rss_id = '$rss_id'";
-    $result = mysqli_query($conn, $check_query);
-
-    if (mysqli_num_rows($result) == 0) {
-        $insert_query = "INSERT INTO news_articles (rss_id, title, content_text, image_url, date_published)
-                         VALUES ('$rss_id', '$title', '$content_text', '$image_url', '$date_published')";
-        mysqli_query($conn, $insert_query);
-    }
-}
-
-// Step 3: Retrieve Articles for Display
+// Step 1: Fetch Articles for Display
 $query = "SELECT * FROM news_articles WHERE is_deleted = 0 ORDER BY date_published DESC";
 $result = mysqli_query($conn, $query);
+
+// Check if query failed
+if (!$result) {
+    die("Error fetching articles: " . mysqli_error($conn));
+}
 ?>
 
 <!DOCTYPE html>
@@ -62,10 +24,19 @@ $result = mysqli_query($conn, $query);
     <!-- Header -->
     <header>
         <nav>
-            <div class="logo"><a href="index.php">World News</a></div>
+            <div class="logo">
+                <a href="index.php">World News</a>
+            </div>
             <div class="auth-links">
-                <a href="login.php" class="login-btn">Login</a>
-                <a href="register.php" class="register-btn">Register</a>
+                <?php if (isset($_SESSION['username'])): ?>
+                    <!-- User is logged in -->
+                    <a href="profile.php" class="profile-btn">Profile</a>
+                    <a href="logout.php" class="logout-btn">Logout</a>
+                <?php else: ?>
+                    <!-- User is not logged in -->
+                    <a href="login.php" class="login-btn">Login</a>
+                    <a href="register.php" class="register-btn">Register</a>
+                <?php endif; ?>
             </div>
         </nav>
     </header>
@@ -92,7 +63,7 @@ $result = mysqli_query($conn, $query);
                                 <?php echo substr(htmlspecialchars($row['content_text']), 0, 100) . '...'; ?>
                             </p>
                             <p class="news-meta">
-                                Published on: <?php echo $row['date_published']; ?>
+                                Published on: <?php echo date('F j, Y', strtotime($row['date_published'])); ?>
                             </p>
                         </div>
                     </div>

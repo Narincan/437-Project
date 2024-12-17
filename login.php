@@ -1,7 +1,46 @@
 <?php
+session_start();
+include 'db.php'; // Include the database connection
+
 $siteName = "Global News Network";
 $currentYear = date("Y");
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get form data
+    $username = mysqli_real_escape_string($conn, trim($_POST['username']));
+    $password = trim($_POST['password']);
+
+    // Basic validation
+    if (empty($username) || empty($password)) {
+        $error = "All fields are required.";
+    } else {
+        // Check if the username exists
+        $query = "SELECT * FROM users WHERE username = '$username'";
+        $result = mysqli_query($conn, $query);
+
+        if (mysqli_num_rows($result) == 1) {
+            $user = mysqli_fetch_assoc($result);
+
+            // Verify password
+            if (password_verify($password, $user['password'])) {
+                // Start session
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+
+                // Redirect to home or dashboard
+                header("Location: ../index.php");
+                exit();
+            } else {
+                $error = "Invalid password.";
+            }
+        } else {
+            $error = "User not found.";
+        }
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +61,10 @@ $currentYear = date("Y");
     <!-- Login Form -->
     <div class="login-container">
         <h2>Login</h2>
-        <form class="login-form" action="index.php">
+        <?php if (isset($error)): ?>
+            <p style="color: red;"><?php echo $error; ?></p>
+        <?php endif; ?>
+        <form class="login-form" action="" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -33,6 +75,7 @@ $currentYear = date("Y");
             </div>
             <button type="submit" class="submit-btn">Login</button>
         </form>
+        <p>Don't have an account? <a href="register.php">Register here</a></p>
     </div>
 
     <footer>
