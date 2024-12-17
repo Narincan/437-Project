@@ -54,7 +54,21 @@ if (!mysqli_query($conn, $users_table)) {
     die("Error creating `users` table: " . mysqli_error($conn));
 }
 
-// Step 5: Confirmation
-// Uncomment this line for debugging to confirm the tables are created.
+// Step 5: Create `comments` table (to store user comments)
+$comments_table = "
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    news_id INT NOT NULL, -- Foreign key referencing news_articles
+    username VARCHAR(50) NOT NULL, -- Commenter's name
+    comment TEXT NOT NULL, -- Comment text
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (news_id) REFERENCES news_articles(id) ON DELETE CASCADE
+)";
+if (!mysqli_query($conn, $comments_table)) {
+    die("Error creating `comments` table: " . mysqli_error($conn));
+}
+
+// Step 6: Confirmation
+// Uncomment this line for debugging to confirm the tables are created
 // echo "Database and tables initialized successfully.";
 ?>

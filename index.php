@@ -1,8 +1,5 @@
 <?php
-// Enable error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
+session_start(); // Start session to check login status
 include 'db.php'; // Database connection
 
 // Step 1: Fetch RSS Feed
@@ -64,8 +61,13 @@ $result = mysqli_query($conn, $query);
         <nav>
             <div class="logo"><a href="index.php">World News</a></div>
             <div class="auth-links">
-                <a href="login.php" class="login-btn">Login</a>
-                <a href="register.php" class="register-btn">Register</a>
+                <?php if (isset($_SESSION['username'])): ?>
+                    <a href="profile.php" class="profile-btn">Profile</a>
+                    <a href="logout.php" class="logout-btn">Logout</a>
+                <?php else: ?>
+                    <a href="login.php" class="login-btn">Login</a>
+                    <a href="register.php" class="register-btn">Register</a>
+                <?php endif; ?>
             </div>
         </nav>
     </header>

@@ -823,11 +823,13 @@ footer {
     }
 
 }
+
+
 /* News Detail Page */
 .news-detail-container {
     max-width: 800px;
     margin: 2rem auto;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -872,4 +874,92 @@ footer {
     line-height: 1.6;
     color: #333;
     text-align: justify;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.comments-section h3 {
+    font-size: 1.5rem;
+    color: #1a237e;
+    margin-bottom: 1rem;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.comment-form label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.comment-form input, 
+.comment-form textarea {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.comment-form input:focus, 
+.comment-form textarea:focus {
+    border-color: #1a237e;
+    outline: none;
+}
+
+.comment-form button {
+    padding: 0.75rem;
+    background-color: #1a237e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.comment-form button:hover {
+    background-color: #283593;
+}
+
+/* Individual Comments */
+.comment {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comment strong {
+    color: #1a237e;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.comment p {
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.comment small {
+    font-size: 0.8rem;
+    color: #666;
+    display: block;
+    text-align: right;
 }
