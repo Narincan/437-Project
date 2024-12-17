@@ -1,40 +1,34 @@
 <?php
-// Fetch the RSS feed
-$rssUrl = "https://rss.app/feeds/v1.1/_XwwiGIQsUmb6Z8hc.json";
-$json = file_get_contents($rssUrl);
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Check if the feed is accessible
-if (!$json) {
-    die("Failed to fetch RSS feed.");
-}
+include 'db.php'; // Database connection
 
-$data = json_decode($json, true);
-
-// Debug: Check if the data is valid
-if (!isset($data['items'])) {
-    die("Invalid RSS feed format.");
-}
-
-// Get the article ID from the URL
+// Step 1: Get the article ID from the URL
 $id = $_GET['id'] ?? null;
-if (!$id) {
-    die("No article ID provided.");
+
+if (!$id || !is_numeric($id)) {
+    die("Invalid or missing article ID.");
 }
 
-// Find the article by ID
-$article = null;
-foreach ($data['items'] as $item) {
-    if ($item['id'] === $id) {
-        $article = $item;
-        break;
-    }
+// Step 2: Fetch the article from the database
+$query = "SELECT * FROM news_articles WHERE id = $id AND is_deleted = 0";
+$result = mysqli_query($conn, $query);
+
+// Check if the query executed successfully
+if (!$result) {
+    die("Error fetching article: " . mysqli_error($conn));
 }
 
-// If no article is found, show an error
-if (!$article) {
+// Step 3: Check if the article exists
+if (mysqli_num_rows($result) == 0) {
     die("Article not found.");
 }
+
+$article = mysqli_fetch_assoc($result);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,21 +38,23 @@ if (!$article) {
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Header -->
     <header>
         <nav>
             <div class="logo"><a href="index.php">World News</a></div>
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main class="news-detail-container">
         <article class="news-detail">
             <h1 class="news-detail-title"><?php echo htmlspecialchars($article['title']); ?></h1>
             <p class="news-meta">
                 Published on: <?php echo date('F j, Y', strtotime($article['date_published'])); ?>
             </p>
-            <?php if (!empty($article['image'])): ?>
+            <?php if (!empty($article['image_url'])): ?>
                 <div class="news-detail-image">
-                    <img src="<?php echo htmlspecialchars($article['image']); ?>" alt="<?php echo htmlspecialchars($article['title']); ?>">
+                    <img src="<?php echo htmlspecialchars($article['image_url']); ?>" alt="<?php echo htmlspecialchars($article['title']); ?>">
                 </div>
             <?php endif; ?>
             <div class="news-detail-content">
@@ -67,6 +63,7 @@ if (!$article) {
         </article>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             &copy; <?php echo date('Y'); ?> World News. All Rights Reserved.
